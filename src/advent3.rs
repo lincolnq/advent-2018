@@ -68,9 +68,16 @@ pub fn advent3(s: String) -> Result<i32, &'static str> {
     //println!("board:\n{:?}", board);
 
     // now count the -1 elements
-    let res = board.mapv(|v| if v == -1 { 1 } else { 0 }).sum();
+    //let res = board.mapv(|v| if v == -1 { 1 } else { 0 }).sum();
 
-    Ok(res)
+    for c in parsed_claims.iter() {
+        println!("checking claim {:?}", c);
+        if check_claim(&board, c) {
+            return Ok(c.id)
+        }
+    }
+
+    Err("No ok claim found")
 }
 
 fn claim_board(b: &mut Board, c: &Claim) {
@@ -85,4 +92,10 @@ fn claim_board(b: &mut Board, c: &Claim) {
             -1
         }
     )
+}
+
+fn check_claim(b: &Board, c: &Claim) -> bool {
+    let slice = b.slice(s![c.x..c.x+c.w, c.y..c.y+c.h]);
+    let expect = Board::from_elem(slice.raw_dim(), c.id);
+    slice == expect
 }

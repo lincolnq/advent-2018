@@ -58,20 +58,23 @@ pub fn advent3(s: String) -> Result<i32, &'static str> {
 
     let parsed_claims = claims(&s).expect("unable to parse claims").1;
 
-    let mut board = Array2::<i32>::zeros((10, 10));
+    let mut board = Array2::<i32>::zeros((1000, 1000));
 
     for c in parsed_claims.iter() {
+        println!("processing claim {:?}", c);
         claim_board(&mut board, c);
     }
 
-    println!("board:\n{:?}", board);
+    //println!("board:\n{:?}", board);
 
+    // now count the -1 elements
+    let res = board.mapv(|v| if v == -1 { 1 } else { 0 }).sum();
 
-    Err("nyi")
+    Ok(res)
 }
 
 fn claim_board(b: &mut Board, c: &Claim) {
-    let mut slice = b.slice_mut(s![c.x..c.x+c.w, c.y..c.y+c.w]);
+    let mut slice = b.slice_mut(s![c.x..c.x+c.w, c.y..c.y+c.h]);
 
     slice.mapv_inplace(|v|
         if v == 0 {

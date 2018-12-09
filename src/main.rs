@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate nom;
+#[macro_use(s)]
+extern crate ndarray;
 
 use std::io::{self, Read};
 mod advent1;

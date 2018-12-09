@@ -1,6 +1,7 @@
 use nom::{digit, multispace0, multispace1};
 use std::str::FromStr;
 use std::num::ParseIntError;
+use ndarray::Array2;
 
 #[derive(Debug,PartialEq)]
 pub struct Claim {
@@ -51,12 +52,34 @@ named!(claims <&str, Vec<Claim>>,
     separated_list_complete!(multispace1, claim)
 );
 
-pub fn advent3(s: String) -> Result<i32, &'static str> {
-    //let lines = s.split("\n").filter(|&l| l != "").collect::<Vec<&str>>();
-    //println!("digit is {:?}", int32("123\n"));
+type Board = Array2<i32>;
 
-    let res = claims(&s);
-    println!("result is {:?}", res);
+pub fn advent3(s: String) -> Result<i32, &'static str> {
+
+    let parsed_claims = claims(&s).expect("unable to parse claims").1;
+
+    let mut board = Array2::<i32>::zeros((10, 10));
+
+    for c in parsed_claims.iter() {
+        claim_board(&mut board, c);
+    }
+
+    println!("board:\n{:?}", board);
+
 
     Err("nyi")
+}
+
+fn claim_board(b: &mut Board, c: &Claim) {
+    let mut slice = b.slice_mut(s![c.x..c.x+c.w, c.y..c.y+c.w]);
+
+    slice.mapv_inplace(|v|
+        if v == 0 {
+            // no conflict
+            c.id
+        } else {
+            // conflict, return -1
+            -1
+        }
+    )
 }

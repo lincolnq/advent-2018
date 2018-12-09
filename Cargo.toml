@@ -5,3 +5,4 @@ authors = ["Lincoln Quirk <lincolnq@gmail.com>"]
 
 [dependencies]
 nom = "4.1.1"
+ndarray = "0.12.1"

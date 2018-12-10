@@ -79,7 +79,8 @@ pub fn advent4(s: String) -> Result<i32, &'static str> {
 
     let sleepsections = summarize(rows);
 
-    Ok(strategy1(&sleepsections))
+    //Ok(strategy1(&sleepsections))
+    Ok(strategy2(&sleepsections))
 }
 
 fn summarize(rows: Vec<(DT, LogEvent)>) -> Vec<SleepSection> {
@@ -129,4 +130,20 @@ fn strategy1(sleepsections: &Vec<SleepSection>) -> i32 {
     */
 
     best_id * best_minute
+}
+
+fn strategy2(sleepsections: &Vec<SleepSection>) -> i32 {
+    let mut minutes = BTreeMap::new();
+    for ss in sleepsections.iter() {
+        for m in ss.min_start..ss.min_start + ss.len {
+            *minutes.entry((m, ss.id)).or_insert(0) += 1;
+        }
+    }
+
+    let sorted_minute_counts = minutes.into_iter().sorted_by_key(|x| x.1).collect::<Vec<((i32, i32), i32)>>();
+    let res = sorted_minute_counts.into_iter().next_back().unwrap();
+    let ((minute, guard_id), count) = res;
+    println!("best minute: 00:{}, guard={}, count={}", minute, guard_id, count);
+
+    minute * guard_id
 }

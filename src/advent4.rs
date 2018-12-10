@@ -77,18 +77,27 @@ pub fn advent4(s: String) -> Result<i32, &'static str> {
     let mut rows = log_rows(&s).expect("unable to parse logs").1;
     rows.sort_unstable_by_key(|x| x.0);
 
+    let sleepsections = summarize(rows);
+
+    Ok(strategy1(&sleepsections))
+}
+
+fn summarize(rows: Vec<(DT, LogEvent)>) -> Vec<SleepSection> {
     let mut sleepsections = Vec::new();
     let mut curr_id: i32 = 0;
     let mut sleep_start_min: i32 = 0;
 
-    for row in rows.iter() {
+    for row in rows.into_iter() {
         match row.1 {
             LogEvent::BeginShift(id) => curr_id = id,
             LogEvent::FallAsleep => sleep_start_min = row.0.minute() as i32,
             LogEvent::WakeUp => sleepsections.push(SleepSection { id: curr_id, min_start: sleep_start_min, len: row.0.minute() as i32 - sleep_start_min }),
         }
     }
+    sleepsections
+}
 
+fn strategy1(sleepsections: &Vec<SleepSection>) -> i32 {
     let mut sleep_totals = BTreeMap::new();
     for ss in sleepsections.iter() {
         *sleep_totals.entry(ss.id).or_insert(0) += ss.len;
@@ -119,5 +128,5 @@ pub fn advent4(s: String) -> Result<i32, &'static str> {
     println!("hello4 {:?}", log_row("[1518-11-01 00:00] Guard #123 begins shift"));
     */
 
-    Ok(best_id * best_minute)
+    best_id * best_minute
 }

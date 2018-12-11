@@ -51,30 +51,11 @@ fn parse(s: String) -> Polymer {
     map
 }
 
-fn divide(m: Polymer) -> Polymer {
+pub fn advent5(s: String) -> Result<i32, &'static str> {
+    println!("start: {}", &s);
+    let mut map = parse(s);
+    println!("map: {:?}", &map);
 
-    let mut current = m;
-
-    if current.len() >= 100 {
-        // divide
-        let (start, end) = {
-            (*current.iter().next().unwrap().0, *current.iter().next_back().unwrap().0)
-        };
-
-        let split = (start + end) / 2;
-        let m2 = current.split_off(&split);
-
-        current = divide(current);
-        current.extend(divide(m2));
-    }
-
-    conquer(&mut current);
-
-    current
-}
-
-fn conquer(m: &mut Polymer) {
-    let mut map = m;
     let mut length = map.len();
     loop {
         step(&mut map);
@@ -82,13 +63,9 @@ fn conquer(m: &mut Polymer) {
             break
         }
         length = map.len();
+        if length % 100 == 0 {
+            println!("len: {}", length);
+        }
     }
-}
-
-pub fn advent5(s: String) -> Result<i32, &'static str> {
-    let mut map = parse(s);
-
-    map = divide(map);
-
-    Ok(map.len() as i32)
+    Ok(length as i32)
 }

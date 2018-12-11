@@ -45,9 +45,15 @@ fn to_num(c: u8) -> i8 {
     }
 }
 
-fn parse(s: String) -> Polymer {
+fn parse(s: String, remove_c: i8) -> Polymer {
     let mut map = BTreeMap::new();
-    map.extend(enumerate(s.trim().bytes().map(to_num)).map(|(i, c)| (i as i32, c)));
+    map.extend(enumerate(
+        s
+            .trim()
+            .bytes()
+            .map(to_num)
+            .filter(|c| *c != remove_c && *c != -remove_c)
+    ).map(|(i, c)| (i as i32, c)));
     map
 }
 
@@ -63,7 +69,15 @@ fn react(map: &mut Polymer) {
 }
 
 pub fn advent5(s: String) -> Result<i32, &'static str> {
-    let mut map = parse(s);
-    react(&mut map);
-    Ok(map.len() as i32)
+    let mut best = s.len();
+    for remove_c in 1..27 {
+        let mut map = parse(s.clone(), remove_c);
+        react(&mut map);
+        if map.len() < best {
+            best = map.len()
+        }
+        println!("remove c {}: {}", remove_c, map.len());
+    }
+
+    Ok(best as i32)
 }

@@ -51,21 +51,19 @@ fn parse(s: String) -> Polymer {
     map
 }
 
-pub fn advent5(s: String) -> Result<i32, &'static str> {
-    println!("start: {}", &s);
-    let mut map = parse(s);
-    println!("map: {:?}", &map);
-
+fn react(map: &mut Polymer) {
     let mut length = map.len();
     loop {
-        step(&mut map);
+        step(map);
         if map.len() == length {
             break
         }
         length = map.len();
-        if length % 100 == 0 {
-            println!("len: {}", length);
-        }
     }
-    Ok(length as i32)
+}
+
+pub fn advent5(s: String) -> Result<i32, &'static str> {
+    let mut map = parse(s);
+    react(&mut map);
+    Ok(map.len() as i32)
 }

@@ -77,38 +77,19 @@ pub fn advent6(s: String) -> Result<i32, &'static str> {
 
     let grid = Grid {left: minx, top: miny, right: maxx, bottom: maxy};
 
-    let mut owned_regions = BTreeMap::new();
+    let mut sq_in_region = 0;
+    let target_dist = 10000;
 
     for p0 in grid.iter_squares() {
-        let mut best = (grid.num_sq(), None);
+        let mut total_dist = 0;
         for p1 in rows.iter() {
             let d = manhattan_dist(&p0, p1);
-            if d < best.0 {
-                best = (d, Some(p1))
-            } else if d == best.0 && best.1.is_some() {
-                best = (d, None)
-            }
+            total_dist += d;
         }
-        if let Some (node) = best.1 {
-            let edge = grid.is_on_edge(p0);
-            let mut ent = owned_regions.entry(node).or_insert(OwnedRegion::Finite(Vec::new()));
-            if edge {
-                // we are on the edge so we must be an infinite region. fill that in.
-                *ent = OwnedRegion::Infinite;
-            } else {
-                if let OwnedRegion::Finite(v) = ent {
-                    // this region doesn't touch the edge (yet) so it could be finite still
-                    // add this square to the count
-                    v.push(p0);
-                } else {
-                    *ent = OwnedRegion::Infinite;
-                }
-            }
+        if total_dist < target_dist {
+            sq_in_region += 1;
         }
     }
 
-    println!("owned regions={:?}", owned_regions);
-    let res = owned_regions.iter().map(|(k,v)| match v { OwnedRegion::Finite(vec) => vec.len(), _ => 0 }).max();
-
-    Ok(res.unwrap() as i32)
+    Ok(sq_in_region)
 }

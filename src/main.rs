@@ -13,6 +13,7 @@ mod advent3;
 mod advent4;
 mod advent5;
 mod advent6;
+mod advent7;
 mod parsing;
 
 use advent2::*;
@@ -20,6 +21,7 @@ use advent3::*;
 use advent4::*;
 use advent5::*;
 use advent6::*;
+use advent7::*;
 
 
 fn main() {
@@ -32,5 +34,6 @@ fn main() {
     //println!("advent3: {}", advent3(str).unwrap());
     //println!("advent4: {}", advent4(str).unwrap());
     //println!("advent5: {}", advent5(str).unwrap());
-    println!("advent6: {}", advent6(str).unwrap());
+    //println!("advent6: {}", advent6(str).unwrap());
+    println!("advent7: {}", advent7(str).unwrap());
 }

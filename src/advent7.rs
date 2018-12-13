@@ -1,6 +1,11 @@
 use nom::multispace1;
 use std::collections::BTreeSet;
 use itertools::Itertools;
+use std::collections::BinaryHeap;
+
+const NWORKERS: i32 = 5;
+const ALL_DELAY: i32 = 60;
+
 
 named!(in_row<&str, (&str, &str)>,
     do_parse!(
@@ -19,10 +24,12 @@ named!(in_rows<&str, Vec<(&str, &str)>>,
 
 type ItemSet<'a> = BTreeSet<&'a str>;
 type ItemDeps<'a> = Vec<(&'a str, &'a str)>;
+type Running<'a> = BinaryHeap<(i32, &'a str)>;
 
-pub fn find_runnable<'a>(deps: &ItemDeps, all_items: &'a ItemSet, completed_items: &ItemSet) -> Option<&'a str> {
+pub fn find_runnable<'a>(deps: &ItemDeps, all_items: &'a ItemSet, completed_items: &ItemSet, scheduled: &Running) -> Option<&'a str> {
     for try_item in all_items.iter() {
-        if completed_items.contains(try_item) {
+        if completed_items.contains(try_item)
+            || scheduled.iter().find(|(_, it)| it == try_item).is_some() {
             continue;
         }
         let mut found_blocker = false;
@@ -38,7 +45,27 @@ pub fn find_runnable<'a>(deps: &ItemDeps, all_items: &'a ItemSet, completed_item
     return None
 }
 
-pub fn advent7(s: String) -> Result<String, &'static str> {
+fn char_to_num(item: &str) -> i32 {
+    // A = 1, etc
+    let c = item.to_ascii_uppercase().chars().next().unwrap();
+    (c as i32) - 64
+}
+
+fn schedule<'a, 'b>(current_time: i32, item: &'b str, running_items: &'a mut Running<'b>) {
+    let completion_time = ALL_DELAY + char_to_num(item) + current_time;
+    running_items.push((-completion_time, item));
+    println!("schedule: {:?}", running_items);
+}
+
+fn sleep<'a, 'b>(running_items: &'a mut Running<'b>, completed: &'a mut BTreeSet<&'b str>) -> i32 {
+    // sleep until a worker completes its task.
+    let (newtime, item) = running_items.pop().expect("Unable to sleep, no tasks on queue");
+    completed.insert(item);
+    println!("sleep till {:?}", -newtime);
+    -newtime
+}
+
+pub fn advent7(s: String) -> Result<i32, &'static str> {
     let mut rows = in_rows(&s).expect("unable to parse input").1;
     println!("rows: {:?}", rows);
 
@@ -48,26 +75,29 @@ pub fn advent7(s: String) -> Result<String, &'static str> {
         all_items.insert(*r);
     }
     let mut completed_items = BTreeSet::new();
-    //let mut running_items = BTreeSet::new();
-    let mut order = Vec::new();
+    let mut running_items = BinaryHeap::new();
+    let mut current_time = 0;
 
+    while completed_items.len() < all_items.len() {
+        // if we have no ready workers, just sleep
+        let ready_workers = NWORKERS - running_items.len();
+        if ready_workers == 0 {
+            current_time = sleep(&mut running_items, &mut completed_items);
+            continue;
+        }
 
-    while (completed_items.len() < all_items.len()) {
-
-        // complete the first item in all_items by looking for a rule in rows which prevents us
-        let result = { find_runnable(&rows, &all_items, &completed_items) };
+        // find a runnable item (an item not in completed_items that has no uncompleted prereqs)
+        let result = find_runnable(&rows, &all_items, &completed_items, &running_items);
 
         match result {
-            Some(try_item) => {
-                // ok, if we are here we decided we can take the try_item
-                println!("take {:?}", try_item);
-                completed_items.insert(try_item);
-                order.push(try_item);
-                //break;
-            },
-            _ => return Err("Out of runnable items")
+            Some(try_item) =>
+                // We have something runnable. Figure out how long it takes and add to running_items
+                schedule(current_time, try_item, &mut running_items),
+            None =>
+                // Nothing to run, even though we have workers. Gotta sleep till a worker finishes
+                current_time = sleep(&mut running_items, &mut completed_items)
         }
     }
 
-    Ok(order.iter().join(""))
+    Ok(current_time)
 }

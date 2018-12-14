@@ -5,12 +5,13 @@ extern crate ndarray;
 extern crate chrono;
 #[macro_use(iproduct)]
 extern crate itertools;
+extern crate ordered_float;
 
 use std::io::{self, Read};
-mod advent8_nodetree;
+mod advent9_marble_game;
 mod parsing;
 
-use advent8_nodetree::*;
+use advent9_marble_game::*;
 
 
 fn main() {
@@ -18,5 +19,5 @@ fn main() {
 
     let mut str = String::new();
     io::stdin().read_to_string(&mut str).expect("unable to read stdin");
-    println!("result: {}", advent8(str).unwrap());
+    println!("result: {}", advent9(str).unwrap());
 }

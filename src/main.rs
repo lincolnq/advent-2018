@@ -8,10 +8,10 @@ extern crate itertools;
 extern crate ordered_float;
 
 use std::io::{self, Read};
-mod advent9_marble_game;
+mod advent10_stars;
 mod parsing;
 
-use advent9_marble_game::*;
+use advent10_stars::*;
 
 
 fn main() {
@@ -19,5 +19,5 @@ fn main() {
 
     let mut str = String::new();
     io::stdin().read_to_string(&mut str).expect("unable to read stdin");
-    println!("result: {}", advent9(str).unwrap());
+    println!("result: {}", advent10(str).unwrap());
 }

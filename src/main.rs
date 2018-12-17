@@ -8,10 +8,10 @@ extern crate itertools;
 extern crate ordered_float;
 
 use std::io::{self, Read};
-mod advent10_stars;
+mod advent11_convolve_power_level;
 mod parsing;
 
-use advent10_stars::*;
+use advent11_convolve_power_level::*;
 
 
 fn main() {
@@ -19,5 +19,5 @@ fn main() {
 
     let mut str = String::new();
     io::stdin().read_to_string(&mut str).expect("unable to read stdin");
-    println!("result: {}", advent10(str).unwrap());
+    println!("result: {}", advent11(str).unwrap());
 }
